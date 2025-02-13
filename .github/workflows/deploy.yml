@@ -34,7 +34,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}  # Use SSH key instead of password
           port: ${{ secrets.SSH_PORT }}
           script: |
-            docker pull darshilchauhan/ci-cd-app:latest
-            docker stop ci-cd-app || true  # Avoid error if container does not exist
-            docker rm ci-cd-app || true
-            docker run -d --name ci-cd-app -p 4000:40000 darshilchauhan/ci-cd-app:latest
+            sudo docker pull darshilchauhan/ci-cd-app:latest
+            sudo docker stop ci-cd-app || true  # Avoid error if container does not exist
+            sudo docker rm ci-cd-app || true
+            sudo docker run -d --name ci-cd-app -p 4000:40000 darshilchauhan/ci-cd-app:latest
