@@ -1,0 +1,40 @@
+name: Docker Image CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}  # Use Access Token instead of password
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: darshilchauhan/ci-cd-app:latest, darshilchauhan/ci-cd-app:${{ github.sha }}
+
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}  # Use SSH key instead of password
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            docker pull darshilchauhan/ci-cd-app:latest
+            docker stop ci-cd-app || true  # Avoid error if container does not exist
+            docker rm ci-cd-app || true
+            docker run -d --name ci-cd-app -p 4000:40000 darshilchauhan/ci-cd-app:latest
